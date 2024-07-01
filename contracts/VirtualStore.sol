@@ -1,0 +1,123 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract VirtualStore {
+    // Structure for Product
+    struct Product {
+        uint id;
+        string name;
+        string description;
+        uint price;
+        uint quantityAvailable;
+    }
+
+    // Structure for Sale
+    struct Sale {
+        uint id;
+        uint productId;
+        uint quantity;
+        uint price;
+        address buyerAddress;
+    }
+
+    // Structure for User
+    struct User {
+        uint id;
+        string name;
+        string email;
+        address ethereumAddress;
+    }
+
+    // State variables for keeping track of IDs
+    uint private nextProductId;
+    uint private nextSaleId;
+    uint private nextUserId;
+
+    // Array of products
+    Product[] public products;
+
+    // Array of sales (private)
+    Sale[] private sales;
+
+    // Mapping of users by ID
+    mapping(uint => User) public users;
+
+    // Event for adding product
+    event ProductAdded(uint id, string name, string description, uint price, uint quantityAvailable);
+
+    // Constructor
+    constructor() {
+        nextProductId = 1;
+        nextSaleId = 1;
+        nextUserId = 1;
+    }
+
+    // Methods for Product
+    function addProduct(string memory _name, string memory _description, uint _price, uint _quantityAvailable) public {
+        uint productId = nextProductId++;
+        products.push(Product(productId, _name, _description, _price, _quantityAvailable));
+        emit ProductAdded(productId, _name, _description, _price, _quantityAvailable);
+    }
+
+    function getProduct(uint _index) public view returns (uint, string memory, string memory, uint, uint) {
+        require(_index < products.length, "Product index out of bounds");
+        Product memory p = products[_index];
+        return (p.id, p.name, p.description, p.price, p.quantityAvailable);
+    }
+
+    function getAllProducts() public view returns (Product[] memory) {
+        return products;
+    }
+
+    function updateProduct(uint _index, string memory _name, string memory _description, uint _price, uint _quantityAvailable) public {
+        require(_index < products.length, "Product index out of bounds");
+        Product storage p = products[_index];
+        p.name = _name;
+        p.description = _description;
+        p.price = _price;
+        p.quantityAvailable = _quantityAvailable;
+    }
+
+    function deleteProduct(uint _index) public {
+        require(_index < products.length, "Product index out of bounds");
+        delete products[_index];
+    }
+
+    // Methods for Sale
+    function recordSale(uint _productId, uint _quantity, uint _price, address _buyerAddress) public {
+        uint saleId = nextSaleId++;
+        sales.push(Sale(saleId, _productId, _quantity, _price, _buyerAddress));
+    }
+
+    function getSale(uint _index) public view returns (uint, uint, uint, uint, address) {
+        require(_index < sales.length, "Sale index out of bounds");
+        Sale memory v = sales[_index];
+        return (v.id, v.productId, v.quantity, v.price, v.buyerAddress);
+    }
+
+    function getAllSales() public view returns (Sale[] memory) {
+        return sales;
+    }
+
+    // Methods for User
+    function registerUser(string memory _name, string memory _email, address _ethereumAddress) public {
+        uint userId = nextUserId++;
+        users[userId] = User(userId, _name, _email, _ethereumAddress);
+    }
+
+    function getUser(uint _id) public view returns (string memory, string memory, address) {
+        User memory u = users[_id];
+        return (u.name, u.email, u.ethereumAddress);
+    }
+
+    function updateUser(uint _id, string memory _name, string memory _email, address _ethereumAddress) public {
+        User storage u = users[_id];
+        u.name = _name;
+        u.email = _email;
+        u.ethereumAddress = _ethereumAddress;
+    }
+
+    function deleteUser(uint _id) public {
+        delete users[_id];
+    }
+}
