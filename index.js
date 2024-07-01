@@ -20,6 +20,8 @@ const web3 = new Web3('http://127.0.0.1:7545');
 
 const app = express();
 const port = 3000;
+app.use(session({ secret: 'XASDASDA' }));
+var ssn;
 
 let accounts = [];
 getAccounts().then(() => {
@@ -44,7 +46,21 @@ async function addProduct(nombre, type, price, quantityAvailable, status) {
     }
 }
 
-
+async function updateUser(id, name, username, senha, age, ethereumAddress) {
+    try {
+        const user = await contract.methods.updateUser(
+            id,
+            name,
+            username,
+            senha,
+            age,
+            ethereumAddress
+        ).send({ from: ethereumAddress, gas: gasLimit });
+        return
+    } catch (error) {
+        console.error('Error al obtener los productos:', error);
+    }
+}
 async function getAllProducts() {
     try {
         const products = await contract.methods.getAllProducts().call();
@@ -74,27 +90,35 @@ app.get('/products', (req, res) => {
         res.send(products);
     });
 });
+
 app.post('/upRoom', (req, res) => {
     const { NumeroQuarto, TipoQuarto, Preco, Status } = req.body; // Extrai os dados do formulário
 
-    addProduct(NumeroQuarto, TipoQuarto, parseInt(Preco, 10), 1, Status);
+    addProduct(NumeroQuarto, TipoQuarto, parseInt(Preco, 10), 1, Status).then(() => {
+        res.send('Product create')
+    }).catch((err) => {
+        res.send('Error product create: ' + err)
+    });
 });
 
 app.post("/atualizarConta", (req, res) => {
     const { nome_completo, user_name, senha, idade } = req.body; // Pega os dados inseridos na página atualizar.ejs
+    ssn = req.session;
 
-    // Faz o update dos dados
-    connection.query(
-        'UPDATE CLIENTE SET nome_completo = ?, senha = ?, idade = ? WHERE user_name = ?',
-        [nome_completo, senha, idade, user_name],
-        (err, results) => {
-            if (err) throw err;
-            res.render("login.ejs"); // Depois de atualizar os dados o usuário é redirecionado para a página de login
-        }
-    );
+    const id = ssn.id;
+    const ethereumAddress = ssn.ethereumAddress;
+    const username = user_name;
+    const name = nome_completo;
+    const age = idade;
+
+    updateUser(id, name, username, senha, age, ethereumAddress).then(() => {
+        res.send('User Update')
+    }).catch((err) => {
+        console.log('Error User Update: ' + err)
+    });
 });
 
 // Inicia el servidor
 app.listen(port, () => {
-    console.log(`App running on http://localhost:${port}`);
+    res.send(`App running on http://localhost:${port}`);
 });
