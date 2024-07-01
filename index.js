@@ -80,6 +80,20 @@ app.post('/upRoom', (req, res) => {
     addProduct(NumeroQuarto, TipoQuarto, parseInt(Preco, 10), 1, Status);
 });
 
+app.post("/atualizarConta", (req, res) => {
+    const { nome_completo, user_name, senha, idade } = req.body; // Pega os dados inseridos na página atualizar.ejs
+
+    // Faz o update dos dados
+    connection.query(
+        'UPDATE CLIENTE SET nome_completo = ?, senha = ?, idade = ? WHERE user_name = ?',
+        [nome_completo, senha, idade, user_name],
+        (err, results) => {
+            if (err) throw err;
+            res.render("login.ejs"); // Depois de atualizar os dados o usuário é redirecionado para a página de login
+        }
+    );
+});
+
 // Inicia el servidor
 app.listen(port, () => {
     console.log(`App running on http://localhost:${port}`);

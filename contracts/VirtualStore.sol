@@ -9,7 +9,7 @@ contract VirtualStore {
         string category;
         uint price;
         uint quantityAvailable;
-        string status; // Nuevo campo
+        string status; // New
     }
 
     // Structure for Sale
@@ -26,6 +26,9 @@ contract VirtualStore {
         uint id;
         string name;
         string email;
+        string username;     // New
+        string password;     // New
+        uint age;            // New
         address ethereumAddress;
     }
 
@@ -102,20 +105,23 @@ contract VirtualStore {
     }
 
     // Methods for User
-    function registerUser(string memory _name, string memory _email, address _ethereumAddress) public {
+    function registerUser(string memory _name, string memory _email, string memory _username, string memory _password, uint _age, address _ethereumAddress) public {
         uint userId = nextUserId++;
-        users[userId] = User(userId, _name, _email, _ethereumAddress);
+        users[userId] = User(userId, _name, _email, _username, _password, _age, _ethereumAddress);
     }
 
-    function getUser(uint _id) public view returns (string memory, string memory, address) {
+    function getUser(uint _id) public view returns (string memory, string memory, string memory, string memory, uint, address) {
         User memory u = users[_id];
-        return (u.name, u.email, u.ethereumAddress);
+        return (u.name, u.email, u.username, u.password, u.age, u.ethereumAddress);
     }
 
-    function updateUser(uint _id, string memory _name, string memory _email, address _ethereumAddress) public {
+    function updateUser(uint _id, string memory _name, string memory _email, string memory _username, string memory _password, uint _age, address _ethereumAddress) public {
         User storage u = users[_id];
         u.name = _name;
         u.email = _email;
+        u.username = _username;
+        u.password = _password;
+        u.age = _age;
         u.ethereumAddress = _ethereumAddress;
     }
 
