@@ -34,15 +34,16 @@ async function getAccounts() {
 const contract = new web3.eth.Contract(contractABI, contractAddress);
 const gasLimit = 500000;
 
-async function addProduct() {
+
+async function addProduct(nombre, type, price, quantityAvailable, status) {
     try {
         const accounts = await web3.eth.getAccounts();
-        await contract.methods.addProduct('Habitacion Simple', 'Habitacion basica', 29, 5).send({ from: accounts[0], gas: gasLimit });
+        await contract.methods.addProduct(nombre, type, price, quantityAvailable, status).send({ from: accounts[0], gas: gasLimit });
     } catch (error) {
         console.error('Error al agregar producto:', error);
     }
 }
-addProduct();
+
 
 async function getAllProducts() {
     try {
@@ -51,9 +52,10 @@ async function getAllProducts() {
         const formattedProducts = products.map(product => ({
             id: product.id.toString(),
             name: product.name,
-            description: product.description,
+            type: product.category,
             price: product.price.toString(),
-            quantityAvailable: product.quantityAvailable.toString()
+            quantityAvailable: product.quantityAvailable.toString(),
+            status: product.status
         }));
         return formattedProducts
     } catch (error) {
@@ -62,15 +64,20 @@ async function getAllProducts() {
 }
 
 // Llamada de ejemplo para obtener y mostrar los productos
+//nombre,type,price,quantityAvailable,status
+addProduct('Habitacion', 'Simple', 34, 3, 'Disponible');
 getAllProducts()
-
-
 
 //Peticiones
 app.get('/products', (req, res) => {
     getAllProducts().then((products) => {
         res.send(products);
     });
+});
+app.post('/upRoom', (req, res) => {
+    const { NumeroQuarto, TipoQuarto, Preco, Status } = req.body; // Extrai os dados do formulário
+
+    addProduct(NumeroQuarto, TipoQuarto, parseInt(Preco, 10), 1, Status);
 });
 
 // Inicia el servidor

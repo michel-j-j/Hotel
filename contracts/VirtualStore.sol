@@ -6,9 +6,10 @@ contract VirtualStore {
     struct Product {
         uint id;
         string name;
-        string description;
+        string category;
         uint price;
         uint quantityAvailable;
+        string status; // Nuevo campo
     }
 
     // Structure for Sale
@@ -43,7 +44,7 @@ contract VirtualStore {
     mapping(uint => User) public users;
 
     // Event for adding product
-    event ProductAdded(uint id, string name, string description, uint price, uint quantityAvailable);
+    event ProductAdded(uint id, string name, string category, uint price, uint quantityAvailable, string status);
 
     // Constructor
     constructor() {
@@ -53,29 +54,30 @@ contract VirtualStore {
     }
 
     // Methods for Product
-    function addProduct(string memory _name, string memory _description, uint _price, uint _quantityAvailable) public {
+    function addProduct(string memory _name, string memory _category, uint _price, uint _quantityAvailable, string memory _status) public {
         uint productId = nextProductId++;
-        products.push(Product(productId, _name, _description, _price, _quantityAvailable));
-        emit ProductAdded(productId, _name, _description, _price, _quantityAvailable);
+        products.push(Product(productId, _name, _category, _price, _quantityAvailable, _status));
+        emit ProductAdded(productId, _name, _category, _price, _quantityAvailable, _status);
     }
 
-    function getProduct(uint _index) public view returns (uint, string memory, string memory, uint, uint) {
+    function getProduct(uint _index) public view returns (uint, string memory, string memory, uint, uint, string memory) {
         require(_index < products.length, "Product index out of bounds");
         Product memory p = products[_index];
-        return (p.id, p.name, p.description, p.price, p.quantityAvailable);
+        return (p.id, p.name, p.category, p.price, p.quantityAvailable, p.status);
     }
 
     function getAllProducts() public view returns (Product[] memory) {
         return products;
     }
 
-    function updateProduct(uint _index, string memory _name, string memory _description, uint _price, uint _quantityAvailable) public {
+    function updateProduct(uint _index, string memory _name, string memory _category, uint _price, uint _quantityAvailable, string memory _status) public {
         require(_index < products.length, "Product index out of bounds");
         Product storage p = products[_index];
         p.name = _name;
-        p.description = _description;
+        p.category = _category;
         p.price = _price;
         p.quantityAvailable = _quantityAvailable;
+        p.status = _status;
     }
 
     function deleteProduct(uint _index) public {
