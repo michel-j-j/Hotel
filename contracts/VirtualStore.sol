@@ -114,7 +114,15 @@ contract VirtualStore {
         User memory u = users[_id];
         return (u.name, u.email, u.username, u.password, u.age, u.ethereumAddress);
     }
-
+    function findUser(string memory _name, string memory _password) public view returns (uint, string memory, string memory, string memory, string memory, uint, address) {
+        for (uint i = 1; i < nextUserId; i++) {
+            User memory u = users[i];
+            if (keccak256(abi.encodePacked(u.name)) == keccak256(abi.encodePacked(_name)) && keccak256(abi.encodePacked(u.password)) == keccak256(abi.encodePacked(_password))) {
+                return (i, u.name, u.email, u.username, u.password, u.age, u.ethereumAddress);
+            }
+        }
+        revert("User not found");
+    }
     function updateUser(uint _id, string memory _name, string memory _email, string memory _username, string memory _password, uint _age, address _ethereumAddress) public {
         User storage u = users[_id];
         u.name = _name;

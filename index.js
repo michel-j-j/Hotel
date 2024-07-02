@@ -61,6 +61,15 @@ async function updateUser(id, name, username, senha, age, ethereumAddress) {
         console.error('Error al obtener los productos:', error);
     }
 }
+async function deleteUser(name, senha) {
+    try {
+        const user = await contract.methods.findUser(name, senha).send({ from: accounts[0], gas: gasLimit });
+        await contract.methods.deleteUser(user.id).send({ from: accounts[0], gas: gasLimit });
+        return;
+    } catch (error) {
+        console.error('Error delete user:', error);
+    }
+}
 async function getAllProducts() {
     try {
         const products = await contract.methods.getAllProducts().call();
@@ -100,7 +109,6 @@ app.post('/upRoom', (req, res) => {
         res.send('Error product create: ' + err)
     });
 });
-
 app.post("/atualizarConta", (req, res) => {
     const { nome_completo, user_name, senha, idade } = req.body; // Pega os dados inseridos na página atualizar.ejs
     ssn = req.session;
@@ -117,6 +125,44 @@ app.post("/atualizarConta", (req, res) => {
         console.log('Error User Update: ' + err)
     });
 });
+app.post("/deletarconta", (req, res) => {
+    const { user_name, senha } = req.body;
+    const name = user_name;
+    deleteUser(name, senha).then(() => {
+        res.send('User Delete')
+    }).catch((err) => {
+        console.log('Error User Delete: ' + err)
+    });;
+});
+app.post('/cadastro', (req, res) => {
+    const { nome_completo, user_name, senha, age, ethereumAddress } = req.body; // Esses dados vão vir do formulário que o usuário digitou
+    const name = nome_completo
+    const username = user_name
+
+    connection.query('SELECT * FROM CLIENTE WHERE email = ? OR cpf = ?', [email, cpf], (err, results) => {
+        if (err) {
+            console.error(err);
+            res.status(500).send('Erro ao verificar usuário. Por favor, tente novamente.');
+            return;
+        }
+
+        if (results.length > 0) {
+            res.send('Email ou CPF já cadastrado. Por favor, escolha outro.');
+        } else {
+            const usuario = { nome_completo, email, senha, cpf };
+
+            connection.query('INSERT INTO CLIENTE SET ?', usuario, (err, results) => {
+                if (err) {
+                    console.error(err);
+                    res.status(500).send('Erro ao cadastrar usuário. Por favor, tente novamente.');
+                    return;
+                }
+                res.redirect('/loginPage');
+            });
+        }
+    });
+});
+
 
 // Inicia el servidor
 app.listen(port, () => {
