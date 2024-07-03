@@ -3,6 +3,7 @@ const { Web3 } = require('web3');
 
 const fs = require('fs');
 const path = require('path');
+const { emit } = require('process');
 
 // Ruta al archivo JSON del contrato
 const contractFilePath = path.join(__dirname, 'build', 'contracts', 'VirtualStore.json');
@@ -20,12 +21,12 @@ const web3 = new Web3('http://127.0.0.1:7545');
 
 const app = express();
 const port = 3000;
-app.use(session({ secret: 'XASDASDA' }));
+//app.use(session({ secret: 'XASDASDA' }));
 var ssn;
 
 let accounts = [];
 getAccounts().then(() => {
-    console.log(accounts[0])
+    console.log(`Account owner: ${accounts[0]}`)
 })
 
 async function getAccounts() {
@@ -87,19 +88,45 @@ async function getAllProducts() {
         console.error('Error al obtener los productos:', error);
     }
 }
+async function registerUser(
+    name,
+    email,
+    senha,
+    username,
+    age,
+    ethereumAddress) {
+    try {
+        await contract.methods.registerUser(name,
+            email,
+            senha,
+            username,
+            age,
+            ethereumAddress).send({ from: ethereumAddress, gas: gasLimit });
+        return;
+    }
+    catch (err) {
+        throw (`Error register user ${err}`)
+    }
+}
 
 // Llamada de ejemplo para obtener y mostrar los productos
 //nombre,type,price,quantityAvailable,status
 addProduct('Habitacion', 'Simple', 34, 3, 'Disponible');
 getAllProducts()
 
-//Peticiones
+///////////////////////////////////////////PETICIONES////////////////////////////////////////////
+
+///////////////////////////////////////////////GET////////////////////////////////////////////
+
 app.get('/products', (req, res) => {
     getAllProducts().then((products) => {
         res.send(products);
     });
 });
+///////////////////////////////////////////////END GET////////////////////////////////////////////
 
+
+///////////////////////////////////////////////POST////////////////////////////////////////////
 app.post('/upRoom', (req, res) => {
     const { NumeroQuarto, TipoQuarto, Preco, Status } = req.body; // Extrai os dados do formulário
 
@@ -135,36 +162,18 @@ app.post("/deletarconta", (req, res) => {
     });;
 });
 app.post('/cadastro', (req, res) => {
-    const { nome_completo, user_name, senha, age, ethereumAddress } = req.body; // Esses dados vão vir do formulário que o usuário digitou
+    const { nome_completo, user_name, email, senha, age, ethereumAddress } = req.body; // Esses dados vão vir do formulário que o usuário digitou
     const name = nome_completo
     const username = user_name
-
-    connection.query('SELECT * FROM CLIENTE WHERE email = ? OR cpf = ?', [email, cpf], (err, results) => {
-        if (err) {
-            console.error(err);
-            res.status(500).send('Erro ao verificar usuário. Por favor, tente novamente.');
-            return;
-        }
-
-        if (results.length > 0) {
-            res.send('Email ou CPF já cadastrado. Por favor, escolha outro.');
-        } else {
-            const usuario = { nome_completo, email, senha, cpf };
-
-            connection.query('INSERT INTO CLIENTE SET ?', usuario, (err, results) => {
-                if (err) {
-                    console.error(err);
-                    res.status(500).send('Erro ao cadastrar usuário. Por favor, tente novamente.');
-                    return;
-                }
-                res.redirect('/loginPage');
-            });
-        }
-    });
+    registerUser(name, email, senha, username, age, ethereumAddress).then(() => {
+        res.send('User Register')
+    }).catch((err) => {
+        console.log(`Error register delete: ${err}`)
+    })
 });
-
+///////////////////////////////////////////////END POST////////////////////////////////////////////
 
 // Inicia el servidor
 app.listen(port, () => {
-    res.send(`App running on http://localhost:${port}`);
+    console.log(`App running on http://localhost:${port}`);
 });
