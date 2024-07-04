@@ -119,7 +119,15 @@ async function registerUser(
         throw (`Error register user ${err}`)
     }
 }
-
+async function recordSale(IdProduct, NameQuarto, TipoQuarto, Preco, ethereumAddress, DataCheckIn, DataCheckOut) {
+    try {
+        await contract.methods.recordSale(IdProduct, 1, Preco, ethereumAddress, DataCheckIn, DataCheckOut).send({ from: ethereumAddress, gas: gasLimit });
+        return;
+    }
+    catch (err) {
+        throw (`Error register user ${err}`)
+    }
+}
 // Llamada de ejemplo para obtener y mostrar los productos
 //nombre,type,price,quantityAvailable,status
 addProduct('Habitacion', 'Simple', 34, 3, 'Disponible');
@@ -193,9 +201,14 @@ app.post('/login', (req, res) => {
 
 });
 app.post('/finalizar-reserva', (req, res) => {
-    // Dados do formulário
-    const { NumeroQuarto, TipoQuarto, Preco, DataCheckIn, DataCheckOut, metodoPagamento } = req.body;
-    
+
+    const { IdProduct, NameQuarto, TipoQuarto, Preco, DataCheckIn, DataCheckOut } = req.body;
+
+    recordSale(IdProduct, NameQuarto, TipoQuarto, Preco, ssn.ethereumAddress, DataCheckIn, DataCheckOut).then(() => {
+        res.send('Successfully achieved sale!')
+    }).catch((err) => {
+        console.log(`Sale error: ${err}`)
+    })
 });
 ///////////////////////////////////////////////END POST////////////////////////////////////////////
 
