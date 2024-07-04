@@ -19,6 +19,8 @@ contract VirtualStore {
         uint quantity;
         uint price;
         address buyerAddress;
+        uint startDate; // New
+        uint endDate;   // New
     }
 
     // Structure for User
@@ -89,15 +91,15 @@ contract VirtualStore {
     }
 
     // Methods for Sale
-    function recordSale(uint _productId, uint _quantity, uint _price, address _buyerAddress) public {
+    function recordSale(uint _productId, uint _quantity, uint _price, address _buyerAddress, uint _startDate, uint _endDate) public {
         uint saleId = nextSaleId++;
-        sales.push(Sale(saleId, _productId, _quantity, _price, _buyerAddress));
+        sales.push(Sale(saleId, _productId, _quantity, _price, _buyerAddress, _startDate, _endDate));
     }
 
-    function getSale(uint _index) public view returns (uint, uint, uint, uint, address) {
+    function getSale(uint _index) public view returns (uint, uint, uint, uint, address, uint, uint) {
         require(_index < sales.length, "Sale index out of bounds");
         Sale memory v = sales[_index];
-        return (v.id, v.productId, v.quantity, v.price, v.buyerAddress);
+        return (v.id, v.productId, v.quantity, v.price, v.buyerAddress, v.startDate, v.endDate);
     }
 
     function getAllSales() public view returns (Sale[] memory) {
@@ -114,6 +116,7 @@ contract VirtualStore {
         User memory u = users[_id];
         return (u.name, u.email, u.username, u.password, u.age, u.ethereumAddress);
     }
+    
     function findUser(string memory _name, string memory _password) public view returns (uint, string memory, string memory, string memory, string memory, uint, address) {
         for (uint i = 1; i < nextUserId; i++) {
             User memory u = users[i];
@@ -123,7 +126,8 @@ contract VirtualStore {
         }
         revert("User not found");
     }
-        function findUserByEmail(string memory _email, string memory _password) public view returns (uint, string memory, string memory, string memory, string memory, uint, address) {
+
+    function findUserByEmail(string memory _email, string memory _password) public view returns (uint, string memory, string memory, string memory, string memory, uint, address) {
         for (uint i = 1; i < nextUserId; i++) {
             User memory u = users[i];
             if (keccak256(abi.encodePacked(u.email)) == keccak256(abi.encodePacked(_email)) && keccak256(abi.encodePacked(u.password)) == keccak256(abi.encodePacked(_password))) {
@@ -132,6 +136,7 @@ contract VirtualStore {
         }
         revert("User not found");
     }
+    
     function updateUser(uint _id, string memory _name, string memory _email, string memory _username, string memory _password, uint _age, address _ethereumAddress) public {
         User storage u = users[_id];
         u.name = _name;

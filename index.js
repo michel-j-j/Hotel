@@ -192,6 +192,11 @@ app.post('/login', (req, res) => {
     })
 
 });
+app.post('/finalizar-reserva', (req, res) => {
+    // Dados do formulário
+    const { NumeroQuarto, TipoQuarto, Preco, DataCheckIn, DataCheckOut, metodoPagamento } = req.body;
+    
+});
 ///////////////////////////////////////////////END POST////////////////////////////////////////////
 
 // Inicia el servidor
