@@ -88,6 +88,17 @@ async function getAllProducts() {
         console.error('Error al obtener los productos:', error);
     }
 }
+async function login(email, pass) {
+    try {
+        return await contract.methods.findUserByEmail(
+            email,
+            pass).call();
+
+    } catch (error) {
+        throw (`Error login user ${err}`)
+    }
+
+}
 async function registerUser(
     name,
     email,
@@ -170,6 +181,16 @@ app.post('/cadastro', (req, res) => {
     }).catch((err) => {
         console.log(`Error register delete: ${err}`)
     })
+});
+
+app.post('/login', (req, res) => {
+    const { email, senha } = req.body; // Traz do formulário o email e a senha do usuário
+    login(email, senha).then(() => {
+        res.send('Successfully achieved user!')
+    }).catch((err) => {
+        console.log(`User login error: ${err}`)
+    })
+
 });
 ///////////////////////////////////////////////END POST////////////////////////////////////////////
 
