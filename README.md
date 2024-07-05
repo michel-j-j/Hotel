@@ -1,3 +1,4 @@
-npx truffle compile 
-npx truffle migrate --network development
-node index.js
+- npx truffle compile 
+- npx truffle migrate --network development
+- node index.js
+- address for testing: 0x8464835a4a848eaf56A47C03E60A2C0A2AC9c3f2
